@@ -3,21 +3,21 @@ package com.example.rest_service;
 import java.time.LocalDate;
 
 public class Transaction {
-    private float id;
+    private int id;
     private LocalDate date;
-    private float amount;
+    private int amount;
 
-    public Transaction(float id, LocalDate date, float amount) {
+    public Transaction(int id, LocalDate date, int amount) {
         this.id = id;
         this.date = date;
         this.amount = amount;
     }
 
-    public float getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(float id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -29,11 +29,11 @@ public class Transaction {
         this.date = date;
     }
 
-    public float getAmount() {
+    public int getAmount() {
         return amount;
     }
 
-    public void setAmount(float amount) {
+    public void setAmount(int amount) {
         this.amount = amount;
     }
 }
