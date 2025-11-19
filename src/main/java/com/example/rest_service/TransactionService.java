@@ -1,7 +1,5 @@
 package com.example.rest_service;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
@@ -19,7 +17,7 @@ public class TransactionService {
     public TransactionService(){
     }
 
-    public List<Transaction> geAllTransactions(){
+    public List<Transaction> getAllTransactions(){
         return transactions;
     }
 
@@ -35,6 +33,7 @@ public class TransactionService {
             }
         return transactionDataValidation(transaction);
     }
+
     public Transaction getTransaction(int id) {
         for (Transaction transaction : transactions) {
             if (transaction.getId() == id)
