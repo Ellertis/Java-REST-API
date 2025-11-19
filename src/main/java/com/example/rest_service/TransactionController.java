@@ -22,11 +22,15 @@ public class TransactionController {
 
     @PostMapping
     public ResponseEntity<String> addTransaction(@RequestBody Transaction transaction){
-        boolean isChallengeAdded = transactionService.addTransaction(transaction);
-        if (isChallengeAdded)
-            return new ResponseEntity<>("Transaction added successfully",HttpStatus.OK);
-        else
-            return new ResponseEntity<>("Transaction not added successfully",HttpStatus.NOT_FOUND);
+        List<String> validationData = transactionService.addTransaction(transaction);
+        String condition = validationData.removeLast();
+        String responseBody = String.join(",",validationData);
+        if(condition.equals("true")){
+            return new ResponseEntity<>("Transaction was added successfully", HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/id/{id}")

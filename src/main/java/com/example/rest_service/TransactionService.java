@@ -1,5 +1,7 @@
 package com.example.rest_service;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
@@ -21,17 +23,18 @@ public class TransactionService {
         return transactions;
     }
 
-    public boolean addTransaction(Transaction transaction){
-        try{
-            transaction.setId(nextId++);
-            transactions.add(transaction);
-            saveTransaction(transaction,"added successfully");
-            return true;}
-        catch (Exception e){
-            return false;
-        }
+    public List<String> addTransaction(Transaction transaction) {
+        try {
+            if (transactionDataValidation(transaction).getLast().equals("true")){
+                transaction.setId(nextId++);
+                transactions.add(transaction);
+                saveTransaction(transaction, "added successfully");
+                return transactionDataValidation(transaction);}}
+        catch(Exception e){
+                return transactionDataValidation(transaction);
+            }
+        return transactionDataValidation(transaction);
     }
-
     public Transaction getTransaction(int id) {
         for (Transaction transaction : transactions) {
             if (transaction.getId() == id)
@@ -80,6 +83,30 @@ public class TransactionService {
         catch (Exception e) {
             return false;}
          */
+    }
+
+    public static List<String> transactionDataValidation(Transaction transaction){
+        List<String> errorCode = new ArrayList<>();
+        boolean safe = true;
+
+        if(transaction.getDate().isBefore(LocalDate.now())) {
+            errorCode.add("The transaction is dated for the day before");
+            safe = false;
+        }
+
+        if(transaction.getName() == null || transaction.getName().trim().isEmpty()){
+            errorCode.add("Name is formated incorrectly");
+            safe = false;
+        }
+
+        if(transaction.getAmount() <= 0){
+            errorCode.add("Invalid Amount below or equal zero");
+            safe = false;
+        }
+
+        //LAST
+        errorCode.add(String.valueOf(safe));
+        return errorCode;
     }
 
     public static void saveTransaction(Transaction transaction,String comment) throws IOException{
