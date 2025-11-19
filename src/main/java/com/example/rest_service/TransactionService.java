@@ -2,6 +2,9 @@ package com.example.rest_service;
 
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +25,7 @@ public class TransactionService {
         try{
             transaction.setId(nextId++);
             transactions.add(transaction);
+            saveTransaction(transaction,"added successfully");
             return true;}
         catch (Exception e){
             return false;
@@ -49,21 +53,45 @@ public class TransactionService {
         try{
         transaction.setDate(updatedTransaction.getDate());
         transaction.setAmount(updatedTransaction.getAmount());
+            saveTransaction(transaction,"updated successfully");
         return true;}
         catch (Exception e) {
             return false;}
     }
 
     public boolean deleteTransaction(int id){
-        return transactions.removeIf(transaction -> transaction.getId() == id);
+        if(transactions.removeIf(transaction -> transaction.getId() == id))
+            try{
+            saveTransaction(id,"deleted successfully");
+            return true;}
+        catch (Exception e){
+                return  false;
+        }
+        else
+            return false;
         /* OR
+        without logging : return transactions.removeIf(transaction -> transaction.getId() == id;
+        OR
         Transaction transaction = getTransaction(id);
         try{
             transactions.remove(transaction);
+            saveTransaction(transaction,"deleted successfully");
             return true;}
         catch (Exception e) {
             return false;}
-
          */
+    }
+
+    public static void saveTransaction(Transaction transaction,String comment) throws IOException{
+        BufferedWriter writer = new BufferedWriter(new FileWriter("TransactionActionsLog"+".txt",true));
+        writer.newLine();
+        writer.write("Transaction "+comment+" Id: "+ transaction.getId()+" Date: "+transaction.getDate()+" Amount: "+transaction.getAmount());
+        writer.close();
+    }
+    public static void saveTransaction(int id,String comment) throws IOException{
+        BufferedWriter writer = new BufferedWriter(new FileWriter("TransactionActionsLog"+".txt",true));
+        writer.newLine();
+        writer.write("Transaction "+comment+" Id: "+id);
+        writer.close();
     }
 }
