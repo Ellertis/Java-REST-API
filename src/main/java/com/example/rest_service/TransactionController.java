@@ -11,61 +11,55 @@ import java.util.List;
 @RequestMapping("/transactions")
 public class TransactionController {
     private final TransactionService transactionService;
+
     public TransactionController(TransactionService transactionService){
         this.transactionService = transactionService;
     }
 
     @GetMapping
     public ResponseEntity<List<Transaction>> getAllTransactions(){
-        return new ResponseEntity<>(transactionService.getAllTransactions(),HttpStatus.OK);
+        return ResponseEntity.ok(transactionService.getAllTransactions());
     }
 
     @PostMapping
-    public ResponseEntity<String> addTransaction(@RequestBody Transaction transaction){
-        List<String> validationData = transactionService.addTransaction(transaction);
-        String condition = validationData.removeLast();
-        String responseBody = String.join(",",validationData);
-        if(condition.equals("true")){
-            return new ResponseEntity<>("Transaction was added successfully", HttpStatus.OK);
-        }
-        else {
-            return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> addTransaction(@RequestBody Transaction transaction) {
+        try {
+            Transaction AddedTransaction = transactionService.addTransaction(transaction);
+            return ResponseEntity.ok("Transaction was added successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @GetMapping("/id/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Transaction> getTransaction(@PathVariable int id){
         Transaction transaction = transactionService.getTransaction(id);
-        if(transaction != null)
-            return new ResponseEntity<>(transaction, HttpStatus.OK);
-        else
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return transaction !=null ?
+                ResponseEntity.ok(transaction) :
+                ResponseEntity.notFound().build();
     }
 
     @GetMapping("/date/{date}")
     public ResponseEntity<Transaction> getTransaction(@PathVariable LocalDate date){
         Transaction transaction = transactionService.getTransaction(date);
-        if(transaction != null)
-            return new ResponseEntity<>(transaction, HttpStatus.OK);
-        else
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return transaction !=null ?
+            ResponseEntity.ok(transaction) :
+            ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<String> updateTransaction(@PathVariable int id, @RequestBody Transaction updatedTransaction){
         boolean transactionUpdated = transactionService.transactionUpdate(id, updatedTransaction);
-        if (transactionUpdated)
-            return new ResponseEntity<>("Transaction updated succesfully",HttpStatus.OK);
-        else
-            return new ResponseEntity<>("Transaction not updated",HttpStatus.NOT_FOUND);
+        return transactionUpdated ?
+            ResponseEntity.ok("Transaction updated successfully") :
+            ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTransaction(@PathVariable int id){
         boolean transactionDeleted = transactionService.deleteTransaction(id);
-        if(transactionDeleted)
-            return new ResponseEntity<>("Transaction deleted",HttpStatus.OK);
-        else
-            return new ResponseEntity<>("Transaction was not deleted",HttpStatus.NOT_FOUND);
+        return transactionDeleted ?
+            ResponseEntity.ok("Transaction deleted") :
+            ResponseEntity.notFound().build();
     }
 }
