@@ -56,6 +56,11 @@ public class TransactionService {
     }
 
     public boolean transactionUpdate(int id, Transaction updatedTransaction) {
+        List<String> errors = transactionDataValidation(updatedTransaction);
+        if (!errors.isEmpty()) {
+            throw new RuntimeException(String.join(", ",errors));
+        }
+
         Transaction transaction = getTransaction(id);
         if (transaction == null){
             return false;
