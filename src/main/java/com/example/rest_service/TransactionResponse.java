@@ -5,17 +5,16 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class Transaction {
-    private int id;
+public class TransactionResponse {
     private String publicId;
     private LocalDate date;
     private int amount;
     private String name;
 
-    public Transaction(){}
+    public TransactionResponse(){}
 
-    public Transaction(int id, LocalDate date, int amount,String name) {
-        this.id = id;
+    public TransactionResponse(String publicId, LocalDate date, int amount, String name) {
+        this.publicId = publicId;
         this.date = date;
         this.amount = amount;
         this.name = name;

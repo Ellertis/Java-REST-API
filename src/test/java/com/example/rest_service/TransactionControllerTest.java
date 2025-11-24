@@ -21,7 +21,7 @@ class TransactionControllerTest {
 
     @BeforeEach
     public void setup(){
-        transactionController = new TransactionController(new TransactionService());
+        //transactionController = new TransactionController(new TransactionService());
     }
 
     @Test

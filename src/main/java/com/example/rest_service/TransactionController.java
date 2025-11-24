@@ -1,6 +1,6 @@
 package com.example.rest_service;
 
-import org.springframework.http.HttpStatus;
+import com.example.rest_service.Exceptions.TransactionNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,54 +12,48 @@ import java.util.List;
 public class TransactionController {
     private final TransactionService transactionService;
 
-    public TransactionController(TransactionService transactionService){
+    public TransactionController(TransactionService transactionService) {
         this.transactionService = transactionService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Transaction>> getAllTransactions(){
+    public ResponseEntity<List<TransactionResponse>> getAllTransactions() {
         return ResponseEntity.ok(transactionService.getAllTransactions());
     }
 
     @PostMapping
-    public ResponseEntity<?> addTransaction(@RequestBody Transaction transaction) {
-        try {
-            Transaction AddedTransaction = transactionService.addTransaction(transaction);
-            return ResponseEntity.ok("Transaction was added successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<TransactionResponse> addTransaction(@RequestBody TransactionRequest request) {
+        TransactionResponse response = transactionService.addTransaction(request);
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Transaction> getTransaction(@PathVariable int id){
-        Transaction transaction = transactionService.getTransaction(id);
-        return transaction !=null ?
-                ResponseEntity.ok(transaction) :
-                ResponseEntity.notFound().build();
+    @GetMapping("/{publicId}")
+    public ResponseEntity<TransactionResponse> getTransaction(@PathVariable String publicId) {
+        TransactionResponse response = transactionService.getTransaction(publicId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/date/{date}")
-    public ResponseEntity<Transaction> getTransaction(@PathVariable LocalDate date){
+    public ResponseEntity<TransactionResponse> getTransaction(@PathVariable LocalDate date) {
         Transaction transaction = transactionService.getTransaction(date);
-        return transaction !=null ?
-            ResponseEntity.ok(transaction) :
-            ResponseEntity.notFound().build();
+        return transaction != null ?
+                ResponseEntity.ok(transactionService.transactionMapper.toResponse(transaction)) :
+                ResponseEntity.notFound().build();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateTransaction(@PathVariable int id, @RequestBody Transaction updatedTransaction){
-        boolean transactionUpdated = transactionService.transactionUpdate(id, updatedTransaction);
-        return transactionUpdated ?
-            ResponseEntity.ok("Transaction updated successfully") :
-            ResponseEntity.notFound().build();
+    @PutMapping("/{publicId}")
+    public ResponseEntity<TransactionResponse> updateTransaction(@PathVariable String publicId, @RequestBody TransactionRequest request) {
+        TransactionResponse response = transactionService.transactionUpdate(publicId, request);
+        return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteTransaction(@PathVariable int id){
-        boolean transactionDeleted = transactionService.deleteTransaction(id);
-        return transactionDeleted ?
-            ResponseEntity.ok("Transaction deleted") :
-            ResponseEntity.notFound().build();
+    @DeleteMapping("/{publicId}")
+    public ResponseEntity<Void> deleteTransaction(@PathVariable String publicId) {
+        try {
+            transactionService.deleteTransaction(publicId);
+            return ResponseEntity.ok().build();
+        } catch (TransactionNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
