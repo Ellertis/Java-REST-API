@@ -106,7 +106,7 @@ public class TransactionService {
 
         }
         /* OR
-        without logging : return transactions.removeIf(transaction -> transaction.getId() == id;
+        without logging : return transactions.removeIf(transaction -> transaction.getId() == id; BUT FUNCTION MUST RETURN BOOLEAN
         OR
         Transaction transaction = getTransaction(id);
         try{
