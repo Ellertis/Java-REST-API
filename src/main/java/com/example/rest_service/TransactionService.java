@@ -2,6 +2,7 @@ package com.example.rest_service;
 
 import com.example.rest_service.Exceptions.TransactionNotFoundException;
 import com.example.rest_service.Exceptions.TransactionValidationException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
@@ -19,6 +20,9 @@ public class TransactionService {
     private final List<Transaction> transactions = new ArrayList<>();
     final TransactionMapper transactionMapper;
     private final IdEncoder idEncoder;
+
+    @Value("${app.logging.file}")
+    private String logFile;
 
     public TransactionService(TransactionMapper transactionMapper, IdEncoder idEncoder) {
         this.transactionMapper = transactionMapper;
@@ -144,14 +148,14 @@ public class TransactionService {
                 .orElse(null);
     }
 
-    public static void saveTransaction(Transaction transaction,String comment) throws IOException{
-        BufferedWriter writer = new BufferedWriter(new FileWriter("TransactionActionsLog"+".txt",true));
+    public void saveTransaction(Transaction transaction,String comment) throws IOException{
+        BufferedWriter writer = new BufferedWriter(new FileWriter(logFile,true));
         writer.newLine();
         writer.write("Transaction "+comment+" Id: "+ transaction.getId()+" Date: "+transaction.getDate()+" Amount: "+transaction.getAmount()+" Name: "+transaction.getName());
         writer.close();
     }
-    public static void saveTransaction(int id,String comment) throws IOException{
-        BufferedWriter writer = new BufferedWriter(new FileWriter("TransactionActionsLog"+".txt",true));
+    public void saveTransaction(int id,String comment) throws IOException{
+        BufferedWriter writer = new BufferedWriter(new FileWriter(logFile,true));
         writer.newLine();
         writer.write("Transaction "+comment+" Id: "+id);
         writer.close();
