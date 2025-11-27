@@ -1,10 +1,14 @@
 package com.example.rest_service;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Transaction {
     private int id;
     private String publicId;
@@ -12,12 +16,4 @@ public class Transaction {
     private int amount;
     private String name;
 
-    public Transaction(){}
-
-    public Transaction(int id, LocalDate date, int amount,String name) {
-        this.id = id;
-        this.date = date;
-        this.amount = amount;
-        this.name = name;
-    }
 }

@@ -1,21 +1,16 @@
 package com.example.rest_service;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TransactionRequest {
     private LocalDate date;
     private int amount;
     private String name;
-
-    public TransactionRequest(){}
-
-    public TransactionRequest(LocalDate date, int amount, String name) {
-        this.date = date;
-        this.amount = amount;
-        this.name = name;
-    }
-
 }

@@ -18,13 +18,13 @@ import java.util.stream.Collectors;
 public class TransactionService {
     private final AtomicInteger nextId = new AtomicInteger(1);
     private final List<Transaction> transactions = new ArrayList<>();
-    final TransactionMapper transactionMapper;
+    private final TransactionMapperTrue transactionMapper;
     private final IdEncoder idEncoder;
 
     @Value("${app.logging.file}")
     private String logFile;
 
-    public TransactionService(TransactionMapper transactionMapper, IdEncoder idEncoder) {
+    public TransactionService(TransactionMapperTrue transactionMapper, IdEncoder idEncoder) {
         this.transactionMapper = transactionMapper;
         this.idEncoder = idEncoder;
     }
@@ -62,10 +62,10 @@ public class TransactionService {
         return transactionMapper.toResponse(transaction);
     }
 
-    public Transaction getTransaction(LocalDate date) {
+    public TransactionResponse getTransaction(LocalDate date) {
         for (Transaction transaction : transactions) {
             if (transaction.getDate().equals(date))
-                return transaction;
+                return transactionMapper.toResponse(transaction);
         }
         return null;
     }

@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -22,8 +21,8 @@ class TransactionControllerTest {
     //@Mock
     TransactionService testTransactionService;
 
-    IdEncoder encoder;
-    TransactionMapper mapper;
+    IdEncoder encoder = new IdEncoder();
+    TransactionMapperTrue mapper;
 
     //@InjectMocks
     TransactionController testTransactionController;
@@ -44,9 +43,7 @@ class TransactionControllerTest {
 
     private void setupForIntegrationTest(){
         // Initialize the real service with dependencies
-        encoder = new IdEncoder();
-        mapper = new TransactionMapper(encoder);
-        testTransactionService = new TransactionService(mapper, encoder);
+        testTransactionService = new TransactionService(mapper,encoder);
 
         // Inject real service into controller
         testTransactionController = new TransactionController(testTransactionService);
@@ -56,20 +53,18 @@ class TransactionControllerTest {
     }
 
     private  void setupForTestingController(){
-        testTransactionService = Mockito.mock(TransactionService.class);
+        testTransactionService = mock(TransactionService.class);
         testTransactionController = new TransactionController(testTransactionService);
     }
 
     private void setupForTestingService(){
-        encoder = new IdEncoder();
-        mapper = new TransactionMapper(encoder);
         testTransactionService = new TransactionService(mapper,encoder);
-        testTransactionController = Mockito.mock(TransactionController.class);
+        testTransactionController = mock(TransactionController.class);
     }
 
     private void peakMockery(){
-        testTransactionService = Mockito.mock(TransactionService.class);
-        testTransactionController = Mockito.mock(TransactionController.class);
+        testTransactionService = mock(TransactionService.class);
+        testTransactionController = mock(TransactionController.class);
     }
 
     @Test
@@ -92,7 +87,7 @@ class TransactionControllerTest {
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
 
-        Mockito.verify(testTransactionService).getAllTransactions();
+        verify(testTransactionService).getAllTransactions();
     }
 
     @Test
@@ -107,7 +102,7 @@ class TransactionControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(testResponse, response.getBody());
 
-        Mockito.verify(testTransactionService).addTransaction(testRequest);
+        verify(testTransactionService).addTransaction(testRequest);
     }
 
     @Test //Adding a transaction, then modifying it
@@ -172,7 +167,7 @@ class TransactionControllerTest {
         assertEquals(HttpStatus.OK,testTransactionResponse.getStatusCode());
         assertEquals(testResponse,testTransactionResponse.getBody());
 
-        Mockito.verify(testTransactionService).getTransaction(publicId);
+        verify(testTransactionService).getTransaction(publicId);
     }
 
     @Test
@@ -191,7 +186,7 @@ class TransactionControllerTest {
         assertEquals(HttpStatus.OK,testTransactionResponse.getStatusCode());
         assertEquals(testResponse,testTransactionResponse.getBody());
 
-        Mockito.verify(testTransactionService).transactionUpdate(publicId,testRequest);
+        verify(testTransactionService).transactionUpdate(publicId,testRequest);
 
         System.out.println("Passed: UpdateTransaction");
     }
@@ -206,7 +201,7 @@ class TransactionControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        Mockito.verify(testTransactionService).deleteTransaction("VFJTXzE=");
+        verify(testTransactionService).deleteTransaction("VFJTXzE=");
 
         System.out.println("Passed: Delete Transaction");
     }

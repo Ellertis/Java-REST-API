@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -15,6 +17,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TransactionNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleTransactionNotFound(TransactionNotFoundException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
                 404,
                 "Not Found",
                 ex.getMessage(),
@@ -26,6 +29,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidIdException.class)
     public ResponseEntity<ErrorResponse> handleInvalidId(InvalidIdException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
                 400,
                 "Bad Request",
                 ex.getMessage(),
@@ -37,6 +41,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TransactionValidationException.class)
     public ResponseEntity<ErrorResponse> handleValidation(TransactionValidationException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
                 400,
                 "Bad Request",
                 ex.getMessage(),
@@ -54,6 +59,7 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining(", "));
 
         ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
                 400,
                 "Validation Failed",
                 errorMessage,

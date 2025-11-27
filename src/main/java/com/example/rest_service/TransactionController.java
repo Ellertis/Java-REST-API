@@ -35,9 +35,9 @@ public class TransactionController {
 
     @GetMapping("/date/{date}")
     public ResponseEntity<TransactionResponse> getTransaction(@PathVariable LocalDate date) {
-        Transaction transaction = transactionService.getTransaction(date);
+        TransactionResponse transaction = transactionService.getTransaction(date);
         return transaction != null ?
-                ResponseEntity.ok(transactionService.transactionMapper.toResponse(transaction)) :
+                ResponseEntity.ok(transaction) :
                 ResponseEntity.notFound().build();
     }
 
