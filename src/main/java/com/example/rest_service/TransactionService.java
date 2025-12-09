@@ -16,17 +16,16 @@ import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
-    private final AtomicInteger nextId = new AtomicInteger(1);
+    private final AtomicInteger nextId = new AtomicInteger(0);
     private final List<Transaction> transactions = new ArrayList<>();
-    private final TransactionMapperTrue transactionMapper;
-    private final IdEncoder idEncoder;
+    private final TransactionMapper transactionMapper;
+    //private final IdEncoder idEncoder;
 
-    @Value("${app.logging.file}")
-    private String logFile;
+    //@Value("${app.logging.file}")
+    private String logFile = new String("test.txt");
 
-    public TransactionService(TransactionMapperTrue transactionMapper, IdEncoder idEncoder) {
+    public TransactionService(TransactionMapper transactionMapper) {
         this.transactionMapper = transactionMapper;
-        this.idEncoder = idEncoder;
     }
 
     public List<TransactionResponse> getAllTransactions() {
@@ -43,6 +42,7 @@ public class TransactionService {
 
         Transaction transaction = transactionMapper.toEntity(request);
         transaction.setId(nextId.getAndAdd(1));
+        transaction.setPublicId(IdEncoder.encode(transaction.getId()));
         transactions.add(transaction);
 
         try{
@@ -54,7 +54,7 @@ public class TransactionService {
     }
 
     public TransactionResponse getTransaction(String publicId) {
-        int internalId = idEncoder.decode(publicId);
+        int internalId = IdEncoder.decode(publicId);
         Transaction transaction = findTransactionById(internalId);
         if (transaction == null) {
             throw new TransactionNotFoundException("Transaction not found with ID: " + publicId);
@@ -83,11 +83,13 @@ public class TransactionService {
             throw new TransactionValidationException(String.join(", ",errors));
         }
 
-        int internalId = idEncoder.decode(publicId);
+        int internalId = IdEncoder.decode(publicId);
         Transaction transaction = getTransaction(internalId);
+
         if (transaction == null){
             throw new TransactionNotFoundException("Transaction not found with ID: "+ publicId);
         }
+
         transactionMapper.updateEntityFromRequest(request,transaction);
 
         try{
@@ -99,7 +101,7 @@ public class TransactionService {
     }
 
     public void deleteTransaction(String publicId){
-        int internalId = idEncoder.decode(publicId);
+        int internalId = IdEncoder.decode(publicId);
         if(transactions.removeIf(transaction -> transaction.getId() == internalId)) {
             try{
             saveTransaction(internalId,"deleted successfully");

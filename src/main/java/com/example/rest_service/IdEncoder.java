@@ -7,12 +7,12 @@ import java.util.Base64;
 
 @Component
 public class IdEncoder {
-    public String encode(int interId){
+    public static String encode(int interId){
         String raw = "TRS_" + interId;
         return Base64.getEncoder().encodeToString(raw.getBytes());
     }
 
-    public int decode(String publicId) {
+    public static int decode(String publicId) {
         try {
             String decoded = new String(Base64.getDecoder().decode(publicId));
             if (!decoded.startsWith("TRS_")) {

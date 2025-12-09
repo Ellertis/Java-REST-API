@@ -22,7 +22,7 @@ class TransactionControllerTest {
     TransactionService testTransactionService;
 
     IdEncoder encoder = new IdEncoder();
-    TransactionMapperTrue mapper;
+    TransactionMapper mapper = new TransactionMapperImpl();
 
     //@InjectMocks
     TransactionController testTransactionController;
@@ -43,7 +43,8 @@ class TransactionControllerTest {
 
     private void setupForIntegrationTest(){
         // Initialize the real service with dependencies
-        testTransactionService = new TransactionService(mapper,encoder);
+        testTransactionService = new TransactionService(mapper);
+        //testTransactionService.set
 
         // Inject real service into controller
         testTransactionController = new TransactionController(testTransactionService);
@@ -58,7 +59,7 @@ class TransactionControllerTest {
     }
 
     private void setupForTestingService(){
-        testTransactionService = new TransactionService(mapper,encoder);
+        testTransactionService = new TransactionService(mapper);
         testTransactionController = mock(TransactionController.class);
     }
 
@@ -133,6 +134,7 @@ class TransactionControllerTest {
         testRequest.setAmount(10);
         testRequest.setName("Amadou");
         ResponseEntity<TransactionResponse> responseUpdate = testTransactionController.updateTransaction(stored.getPublicId(),testRequest);
+        System.out.println(testTransactionController.getTransaction(stored.getPublicId()));
 
         //Assertions on the update
         assertNotNull(responseUpdate);
