@@ -1,5 +1,6 @@
 package com.example.rest_service;
 
+import com.example.rest_service.MongoDB.EntityToSave;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -10,6 +11,8 @@ public interface TransactionMapper {
     Transaction toEntity(TransactionRequest request);
 
     TransactionResponse toResponse(Transaction entity);
+
+    EntityToSave toSaveEntity(Transaction entity);
 
     //public void updateEntityFromRequest(TransactionRequest request, Transaction entity);
     @AfterMapping

@@ -2,6 +2,9 @@ package com.example.rest_service;
 
 import com.example.rest_service.Exceptions.TransactionNotFoundException;
 import com.example.rest_service.Exceptions.TransactionValidationException;
+import com.example.rest_service.MongoDB.MongoTestRepository;
+import com.example.rest_service.MongoDB.TestClass;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +22,8 @@ public class TransactionService {
     private final AtomicInteger nextId = new AtomicInteger(0);
     private final List<Transaction> transactions = new ArrayList<>();
     private final TransactionMapper transactionMapper;
-    //private final IdEncoder idEncoder;
+    @Autowired
+    MongoTestRepository mongoDBing;
 
     //@Value("${app.logging.file}")
     private String logFile = new String("test.txt");
@@ -46,7 +50,10 @@ public class TransactionService {
         transactions.add(transaction);
 
         try{
-            saveTransaction(transaction, "added successfully");}
+            saveTransaction(transaction, "added successfully");
+            mongoDBing.save(transactionMapper.toSaveEntity(transaction));
+            System.out.println(mongoDBing.findAll().getLast());
+        }
         catch (Exception e){
             System.out.println("Failed to log transaction creation: " + e.getMessage());
         }

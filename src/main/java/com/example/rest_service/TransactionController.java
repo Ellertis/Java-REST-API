@@ -1,6 +1,7 @@
 package com.example.rest_service;
 
 import com.example.rest_service.Exceptions.TransactionNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
