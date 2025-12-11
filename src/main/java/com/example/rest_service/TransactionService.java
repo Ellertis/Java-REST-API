@@ -2,10 +2,9 @@ package com.example.rest_service;
 
 import com.example.rest_service.Exceptions.TransactionNotFoundException;
 import com.example.rest_service.Exceptions.TransactionValidationException;
-import com.example.rest_service.MongoDB.MongoTestRepository;
-import com.example.rest_service.MongoDB.TestClass;
+import com.example.rest_service.MongoDB.MongoDBService;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
@@ -19,21 +18,35 @@ import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
-    private final AtomicInteger nextId = new AtomicInteger(0);
+    private AtomicInteger nextId;// = new AtomicInteger(0);
     private final List<Transaction> transactions = new ArrayList<>();
     private final TransactionMapper transactionMapper;
+
     @Autowired
-    MongoTestRepository mongoDBing;
+    private MongoDBService mongoSave;
 
     //@Value("${app.logging.file}")
-    private String logFile = new String("test.txt");
+    private final String logFile = ("test.txt");
 
     public TransactionService(TransactionMapper transactionMapper) {
         this.transactionMapper = transactionMapper;
     }
 
+    @PostConstruct
+    public void init(){
+        System.out.println(mongoSave.getCount());
+        nextId = (mongoSave.getCount() == 0)? new AtomicInteger(0)
+                :new AtomicInteger(IdEncoder.decode(mongoSave.getLastTransaction().getPublicId())+1);
+    }
+
     public List<TransactionResponse> getAllTransactions() {
         return transactions.stream()
+                .map(transactionMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<TransactionResponse> getAllTransactionsDB(){
+        return mongoSave.getAllTransactions().stream()
                 .map(transactionMapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -51,8 +64,7 @@ public class TransactionService {
 
         try{
             saveTransaction(transaction, "added successfully");
-            mongoDBing.save(transactionMapper.toSaveEntity(transaction));
-            System.out.println(mongoDBing.findAll().getLast());
+            mongoSave.saveDB(transactionMapper.toSaveEntity(transaction));
         }
         catch (Exception e){
             System.out.println("Failed to log transaction creation: " + e.getMessage());
@@ -63,25 +75,23 @@ public class TransactionService {
     public TransactionResponse getTransaction(String publicId) {
         int internalId = IdEncoder.decode(publicId);
         Transaction transaction = findTransactionById(internalId);
-        if (transaction == null) {
+        Transaction transactionDB = transactionMapper.toEntity(mongoSave.getTransactionById(internalId));
+        if (transaction == null & transactionDB == null) {
             throw new TransactionNotFoundException("Transaction not found with ID: " + publicId);
         }
-        return transactionMapper.toResponse(transaction);
+        return transactionMapper.toResponse(transactionDB);
     }
 
     public TransactionResponse getTransaction(LocalDate date) {
+        return transactionMapper.toResponse(mongoSave.getTransactionByDate(date));
+
+        /*
         for (Transaction transaction : transactions) {
             if (transaction.getDate().equals(date))
                 return transactionMapper.toResponse(transaction);
         }
         return null;
-    }
-    public Transaction getTransaction(int id) {
-        for (Transaction transaction : transactions) {
-            if (transaction.getId() == id)
-                return transaction;
-        }
-        return null;
+         */
     }
 
     public TransactionResponse transactionUpdate(String publicId, TransactionRequest request) {
@@ -91,24 +101,29 @@ public class TransactionService {
         }
 
         int internalId = IdEncoder.decode(publicId);
-        Transaction transaction = getTransaction(internalId);
+        Transaction transaction = findTransactionById(internalId);
+        Transaction transaction1 = transactionMapper.toEntity(mongoSave.getTransactionById(internalId));
 
         if (transaction == null){
             throw new TransactionNotFoundException("Transaction not found with ID: "+ publicId);
         }
 
         transactionMapper.updateEntityFromRequest(request,transaction);
+        transactionMapper.updateEntityFromRequest(request,transaction1);
 
         try{
-            saveTransaction(transaction,"updated successfully");}
+            saveTransaction(transaction,"updated successfully");
+            mongoSave.updateTransaction(transactionMapper.toSaveEntity(transaction1));
+        }
         catch (Exception e) {
             System.out.println("Failed to log transaction creation: " + e.getMessage());}
 
-        return  transactionMapper.toResponse(transaction);
+        return  transactionMapper.toResponse(transaction1);
     }
 
     public void deleteTransaction(String publicId){
         int internalId = IdEncoder.decode(publicId);
+        mongoSave.delete(mongoSave.getTransactionById(internalId));
         if(transactions.removeIf(transaction -> transaction.getId() == internalId)) {
             try{
             saveTransaction(internalId,"deleted successfully");

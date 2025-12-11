@@ -19,7 +19,7 @@ public class TransactionController {
 
     @GetMapping
     public ResponseEntity<List<TransactionResponse>> getAllTransactions() {
-        return ResponseEntity.ok(transactionService.getAllTransactions());
+        return ResponseEntity.ok(transactionService.getAllTransactionsDB());
     }
 
     @PostMapping
