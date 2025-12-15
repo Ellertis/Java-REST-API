@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 
-public interface MongoDBRepo extends MongoRepository<EntityToSave, ObjectId>{
+public interface MongoDBRepo extends MongoRepository<EntityToSave, ObjectId> {
     public List<EntityToSave> findByName(String name);
     public List<EntityToSave> findByAmount(float amount);
     public EntityToSave findByPublicId (String id);

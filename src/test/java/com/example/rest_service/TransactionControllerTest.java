@@ -1,5 +1,7 @@
 package com.example.rest_service;
 
+import com.example.rest_service.MongoDB.MongoDBRepo;
+import com.example.rest_service.MongoDB.MongoDBService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -18,10 +20,12 @@ import static org.mockito.Mockito.*;
 
 class TransactionControllerTest {
 
+    MongoDBServiceTest mongoDBService;
+
     //@Mock
     TransactionService testTransactionService;
 
-    IdEncoder encoder = new IdEncoder();
+    IdEncoder encoder;
     TransactionMapper mapper = new TransactionMapperImpl();
 
     //@InjectMocks
@@ -42,15 +46,18 @@ class TransactionControllerTest {
     }
 
     private void setupForIntegrationTest(){
+        mongoDBService = new MongoDBServiceTest();
+
         // Initialize the real service with dependencies
         testTransactionService = new TransactionService(mapper);
-        //testTransactionService.set
+        testTransactionService.init();
 
         // Inject real service into controller
         testTransactionController = new TransactionController(testTransactionService);
 
         // Prepare test request
         testRequest = new TransactionRequest(LocalDate.now(), 1, "Emils");
+
     }
 
     private  void setupForTestingController(){
@@ -82,13 +89,13 @@ class TransactionControllerTest {
     void getAllTransactionsThroughController(){
         setupForTestingController();
 
-        when(testTransactionService.getAllTransactions()).thenReturn(testTransactionList);
+        when(testTransactionService.getAllTransactionsDB()).thenReturn(testTransactionList);
 
         ResponseEntity<List<TransactionResponse>> response = testTransactionController.getAllTransactions();
 
         assertEquals(HttpStatus.OK,response.getStatusCode());
 
-        verify(testTransactionService).getAllTransactions();
+        verify(testTransactionService).getAllTransactionsDB();
     }
 
     @Test
@@ -121,7 +128,7 @@ class TransactionControllerTest {
         assertEquals(testRequest.getAmount(), responseAdd.getBody().getAmount());
 
         //Now verify the transaction is stored in the service
-        List<TransactionResponse> transactions = testTransactionService.getAllTransactions();
+        List<TransactionResponse> transactions = testTransactionService.getAllTransactionsDB();
         assertEquals(1, transactions.size());
 
         TransactionResponse stored = transactions.getFirst();

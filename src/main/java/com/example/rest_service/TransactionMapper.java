@@ -17,10 +17,10 @@ public interface TransactionMapper {
 
     TransactionResponse toResponse(Transaction entity);
 
+    TransactionResponse toResponse(EntityToSave entity);
+
     @Mapping(target = "mongoId", ignore = true)
     EntityToSave toSaveEntity(Transaction entity);
-
-    TransactionResponse toResponse(EntityToSave entity);
 
     //public void updateEntityFromRequest(TransactionRequest request, Transaction entity);
     @AfterMapping

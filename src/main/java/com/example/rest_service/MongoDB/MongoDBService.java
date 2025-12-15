@@ -8,40 +8,29 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
-public class MongoDBService/* implements CommandLineRunner*/ {
+public class MongoDBService{
 
     @Autowired
     MongoDBRepo repository;
 
+    public MongoDBService(){}
+
+    public MongoDBService(MongoDBRepo mongoDBRepo){
+        this.repository = mongoDBRepo;
+    }
+
     @PostConstruct
     public void init(){
         repository.deleteAll();
-    }
-/*
-    public static void main(String[] args) {
-        SpringApplication.run(MongoDBService.class, args);
+        //repository put logic here
     }
 
-    @Override
-    public void run(String... args) throws Exception{
-        repository.deleteAll();
-        System.out.println("Doing things");
-
-        EntityToSave entity1 = new EntityToSave("Emils",10);
-        EntityToSave entity2 = new EntityToSave("Amadou",10);
-
-        //repository.save(entity1);
-        repository.save(entity2);
-        System.out.println(repository.findAll());
-    }
-*/
-    public void saveDB(EntityToSave entity){
+    public void saveTransaction(EntityToSave entity){
         System.out.println("Before: " + repository.count());
         repository.save(entity);
         System.out.println("After: " + repository.count());
         System.out.println(repository.findAll().getLast());
         System.out.println(repository.findAll());
-        System.out.println(entity.getMongoId().toString());
     }
 
     private void delete(){
@@ -74,11 +63,4 @@ public class MongoDBService/* implements CommandLineRunner*/ {
     public void updateTransaction(EntityToSave entity){
         repository.updateById(entity.getId(), entity.getName(), entity.getAmount(),entity.getDate());
     }
-
-    /*
-    Optional <EntityToSave> updatedEntity = mongoTestRepository.findById(entity.getId());
-    assert updatedEntity.isPresent();
-    assert updatedEntity.equals(mongoTestRepository.findById(entity.getId()));
-    System.out.println(mongoTestRepository.count());
-    */
 }

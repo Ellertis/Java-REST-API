@@ -23,7 +23,7 @@ public class TransactionService {
     private final TransactionMapper transactionMapper;
 
     @Autowired
-    private MongoDBService mongoSave;
+    private MongoDBService mongoDBService;
 
     //@Value("${app.logging.file}")
     private final String logFile = ("test.txt");
@@ -34,9 +34,9 @@ public class TransactionService {
 
     @PostConstruct
     public void init(){
-        System.out.println(mongoSave.getCount());
-        nextId = (mongoSave.getCount() == 0)? new AtomicInteger(0)
-                :new AtomicInteger(IdEncoder.decode(mongoSave.getLastTransaction().getPublicId())+1);
+        System.out.println(mongoDBService.getCount());
+        nextId = (mongoDBService.getCount() == 0)? new AtomicInteger(0)
+                :new AtomicInteger(IdEncoder.decode(mongoDBService.getLastTransaction().getPublicId())+1);
     }
 
     public List<TransactionResponse> getAllTransactions() {
@@ -46,7 +46,7 @@ public class TransactionService {
     }
 
     public List<TransactionResponse> getAllTransactionsDB(){
-        return mongoSave.getAllTransactions().stream()
+        return mongoDBService.getAllTransactions().stream()
                 .map(transactionMapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -64,7 +64,7 @@ public class TransactionService {
 
         try{
             saveTransaction(transaction, "added successfully");
-            mongoSave.saveDB(transactionMapper.toSaveEntity(transaction));
+            mongoDBService.saveTransaction(transactionMapper.toSaveEntity(transaction));
         }
         catch (Exception e){
             System.out.println("Failed to log transaction creation: " + e.getMessage());
@@ -75,15 +75,15 @@ public class TransactionService {
     public TransactionResponse getTransaction(String publicId) {
         int internalId = IdEncoder.decode(publicId);
         Transaction transaction = findTransactionById(internalId);
-        Transaction transactionDB = transactionMapper.toEntity(mongoSave.getTransactionById(internalId));
-        if (transaction == null & transactionDB == null) {
+        transaction = transactionMapper.toEntity(mongoDBService.getTransactionById(internalId));
+        if (transaction == null) {
             throw new TransactionNotFoundException("Transaction not found with ID: " + publicId);
         }
-        return transactionMapper.toResponse(transactionDB);
+        return transactionMapper.toResponse(transaction);
     }
 
     public TransactionResponse getTransaction(LocalDate date) {
-        return transactionMapper.toResponse(mongoSave.getTransactionByDate(date));
+        return transactionMapper.toResponse(mongoDBService.getTransactionByDate(date));
 
         /*
         for (Transaction transaction : transactions) {
@@ -102,28 +102,27 @@ public class TransactionService {
 
         int internalId = IdEncoder.decode(publicId);
         Transaction transaction = findTransactionById(internalId);
-        Transaction transaction1 = transactionMapper.toEntity(mongoSave.getTransactionById(internalId));
+        transaction = transactionMapper.toEntity(mongoDBService.getTransactionById(internalId));
 
         if (transaction == null){
             throw new TransactionNotFoundException("Transaction not found with ID: "+ publicId);
         }
 
         transactionMapper.updateEntityFromRequest(request,transaction);
-        transactionMapper.updateEntityFromRequest(request,transaction1);
 
         try{
             saveTransaction(transaction,"updated successfully");
-            mongoSave.updateTransaction(transactionMapper.toSaveEntity(transaction1));
+            mongoDBService.updateTransaction(transactionMapper.toSaveEntity(transaction));
         }
         catch (Exception e) {
             System.out.println("Failed to log transaction creation: " + e.getMessage());}
 
-        return  transactionMapper.toResponse(transaction1);
+        return  transactionMapper.toResponse(transaction);
     }
 
     public void deleteTransaction(String publicId){
         int internalId = IdEncoder.decode(publicId);
-        mongoSave.delete(mongoSave.getTransactionById(internalId));
+        mongoDBService.delete(mongoDBService.getTransactionById(internalId));
         if(transactions.removeIf(transaction -> transaction.getId() == internalId)) {
             try{
             saveTransaction(internalId,"deleted successfully");
